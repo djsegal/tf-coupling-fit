@@ -58,15 +58,21 @@ tf-coupling-fit/
 |   |-- 04_cln2_strict_vs_relaxed.png
 |   |-- 05_lcurve.png
 |   `-- 06_fit_quality.png
-`-- output/
-    |-- tf_handoff.xlsx                <- everything below, as one workbook
-    `-- tf_handoff/                    <- the handoff folder
-        |-- README.md                   <-   conventions, units, load snippet
-        |-- metadata.json               <-   fit params, source data, counts
-        |-- alpha_matrix.csv            <-   dense n_substrates x n_tfs matrix
-        |-- alpha_edges.csv             <-   long form, all candidate edges
-        |-- tf_network_candidate.csv    <-   structural network from Teufel
-        `-- tf_network_fitted.csv       <-   only edges with abs(alpha) > 0
+|-- output/
+|   |-- tf_handoff.xlsx                <- everything below, as one workbook
+|   `-- tf_handoff/                    <- the handoff folder
+|       |-- README.md                   <-   conventions, units, load snippet
+|       |-- metadata.json               <-   fit params, source data, counts
+|       |-- alpha_matrix.csv            <-   dense n_substrates x n_tfs matrix
+|       |-- alpha_edges.csv             <-   long form, all candidate edges
+|       |-- tf_network_candidate.csv    <-   structural network from Teufel
+|       `-- tf_network_fitted.csv       <-   only edges with abs(alpha) > 0
+`-- transcription_multiplier/       <- turning the couplings into a cell-cycle rate
+    |-- README.md                   <-   how to use it + validation summary
+    |-- multiplier.jl               <-   drop-in mean-preserving multiplier
+    |-- refit.jl                    <-   fit-reproduction + CV harness (JuMP/HiGHS)
+    |-- runtests.jl                 <-   tests (reproduces the committed fit exactly)
+    `-- data/                       <-   TF means, q_x scores, validation tables
 ```
 
 ## How to use the output in the whole-cell model
@@ -85,6 +91,16 @@ matches how your downstream code wants the data:
 
 `output/tf_handoff.xlsx` is the same six files bundled into one Excel
 workbook, one sheet per file. Convenient for emailing.
+
+### Driving a cell-cycle dependent rate
+
+If you want to turn these couplings into a time-varying transcription rate for a
+dynamic model, see `transcription_multiplier/`. It provides a mean-preserving
+multiplier `k_x(t) = k_x * (1 + q_x * sum_i alpha_i (TF_i(t)/TF_i_mean - 1) / sum_i |alpha_i|)`,
+the per-TF cell-cycle means it needs, per-gene periodicity weights `q_x`, a drop-in
+Julia implementation, a fit-reproduction harness with tests (reproduces the committed
+fit exactly), and a six-source validation of the network. See its README for the
+formula, data dictionary, and validation summary.
 
 Example Julia code (from inside `output/tf_handoff/`):
 
