@@ -60,6 +60,29 @@ const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
         end
     end
 
+    @testset "committed TF means make <M> = 1 to machine precision" begin
+        # Regression guard: tf_means.csv must hold the discrete mean of the SAME
+        # NaN-interpolated 22-point trajectory the multiplier rides on, so the
+        # deviation form is mean-preserving (<M_x>_t = 1) for EVERY gene, not just
+        # the ones with complete TF data. Averaging TF means over only the non-NaN
+        # timepoints (the prior bug) left <M>-1 up to 0.112 for ~394 genes.
+        committed_means = Dict{String,Float64}()
+        for row in CSV.read(joinpath(@__DIR__, "data", "tf_means.csv"), DataFrame) |> eachrow
+            ismissing(row.tf_mean_rpm) || (committed_means[String(row.tf)] = Float64(row.tf_mean_rpm))
+        end
+        # ratios use the file's means (in RPM) against the interpolated trajectory.
+        cratios(sub, k) = Float64[(expr[gidx[tf], k] / RPM_TO_MOLECULES) / committed_means[tf]
+                                  for (tf, _) in fitted[sub]]
+        cMseries(sub) = [multiplier(alphas(sub), cratios(sub, k)) for k in 1:T]
+        maxdev = 0.0
+        for sub in keys(fitted)
+            all(haskey(committed_means, tf) for (tf, _) in fitted[sub]) || continue
+            maxdev = max(maxdev, abs(mean(cMseries(sub)) - 1.0))
+        end
+        @info "max |<M>-1| over all genes (committed tf_means.csv)" maxdev
+        @test maxdev < 1e-9
+    end
+
     @testset "deviation form stays non-negative" begin
         for sub in ("VHR1", "RTS3", "YGP1", "LAP3", "CAR1")
             @test minimum(Mseries(sub)) >= -1e-9

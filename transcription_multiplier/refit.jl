@@ -141,6 +141,9 @@ function fit_all(time_axis, gene_index, expression, regulators; tau=DEFAULT_TAU,
     return out
 end
 
+# TF means (data/tf_means.csv) are the discrete means of this same NaN-interpolated
+# 22-point grid (load_rna_seq), so the deviation-form multiplier below is
+# mean-preserving (⟨M⟩ₜ = 1) to machine precision for every gene.
 "Mean-preserving deviation-form multiplier for one substrate."
 function multiplier(alphas::Vector{Float64}, ratios::Vector{Float64}; q=1.0)
     sabs = sum(abs, alphas)

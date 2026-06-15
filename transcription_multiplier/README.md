@@ -44,13 +44,14 @@ julia --project=.. transcription_multiplier/runtests.jl
 `refit.jl` re-implements the fitting linear program (JuMP/HiGHS) and reproduces the
 committed `alpha` exactly (max |delta alpha| = 0). `runtests.jl` checks that, plus
 the multiplier properties (unit mean, non-negativity, all-activator identity,
-`q_x` amplitude scaling). All 27 checks passing.
+`q_x` amplitude scaling, and machine-precision mean preservation across all genes).
+All 28 checks passing.
 
 ## Data dictionary (`data/`)
 
 | File | Contents |
 | --- | --- |
-| `tf_means.csv` | per-TF cell-cycle mean (the required multiplier input) |
+| `tf_means.csv` | per-TF cell-cycle mean (the required multiplier input), computed on the interpolated 22-point grid so the multiplier is mean-preserving to machine precision |
 | `tf_network_fitted.csv` | fitted non-zero couplings `(substrate, tf, alpha)` |
 | `qx_scores.csv` | per-gene `q_x` from Cyclebase 3.0 (rank, p-value, peaktime) + three [0,1] transforms |
 | `tf_normalization_table.csv` | per-gene `sum alpha`, `sum |alpha|`, flags, min multiplier |

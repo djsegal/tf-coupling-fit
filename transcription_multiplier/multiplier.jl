@@ -7,6 +7,10 @@ Drop-in (Julia): cell-cycle transcription-rate multiplier for a dynamic model.
 Mean-preserving deviation form (see report/report.pdf): ⟨M⟩ₜ = 1 for any α signs
 and any qₓ, never blows up, keeps repressor signs, identical to the signed form
 when all αᵢ > 0. Units cancel in TFᵢ(t)/TFᵢ_mean.
+
+The TFᵢ_mean values in data/tf_means.csv are the discrete means of the same
+NaN-interpolated 22-point trajectory the multiplier is evaluated on, so ⟨M⟩ₜ = 1
+holds to machine precision for every gene (not just genes with complete TF data).
 =#
 using CSV, DataFrames
 
