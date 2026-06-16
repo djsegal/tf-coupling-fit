@@ -143,7 +143,7 @@ the *scored* headline does not depend on it, since the joint couplings are shipp
 | `augmented_alpha_fitted.csv` | `alpha` refit on the augmented network |
 | `union_network_alpha_fitted.csv` | `alpha` refit on the union of all sources (an alternative coupling set) |
 | `ground_truth_cellcycle_edges.csv` | 62 curated, cited textbook cell-cycle edges |
-| `multiplier_confidence.csv` | per-gene 0–1 trust score (blend of periodicity, bootstrap robustness, source support, cross-dataset transfer, repressor fragility) + USE/CAUTION/DO-NOT-USE tier and reason; a heuristic flag for downstream use, not a calibrated probability |
+| `multiplier_confidence.csv` | per-gene 0-1 trust score (blend of periodicity, bootstrap robustness, source support, cross-dataset transfer, repressor fragility) + USE/CAUTION/DO-NOT-USE tier and reason; a heuristic flag for downstream use, not a calibrated probability |
 
 ## What the multiplier is (and is not)
 
