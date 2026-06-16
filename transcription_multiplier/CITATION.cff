@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use these transcription-factor couplings or the cell-cycle rate multiplier, please cite this work and the source data (Teufel et al. 2019)."
+title: "tf-coupling-fit: transcription-factor coupling strengths and a mean-preserving cell-cycle rate multiplier for Saccharomyces cerevisiae"
+type: software
+authors:
+  - family-names: Segal
+    given-names: Daniel J.
+url: "https://github.com/djsegal/tf-coupling-fit"
+repository-code: "https://github.com/djsegal/tf-coupling-fit"
+license: MIT
+keywords:
+  - transcription factor
+  - gene regulatory network
+  - cell cycle
+  - Saccharomyces cerevisiae
+  - whole-cell model
+abstract: >-
+  Per-edge transcription-factor coupling strengths for budding yeast, fit by an
+  L1-regularized linear program, together with a mean-preserving multiplier that
+  turns the couplings into a cell-cycle-dependent transcription rate without
+  changing each gene's average rate. The couplings are derived from the RNA-seq
+  time course and regulatory network of Teufel et al. 2019.
+references:
+  - type: article
+    title: "A transcriptome-wide analysis deciphers distinct roles of G1 cyclins in temporal organization of the yeast cell cycle"
+    authors:
+      - family-names: Teufel
+        given-names: Lotte
+      - family-names: Tummler
+        given-names: Katja
+      - family-names: Flöttmann
+        given-names: Max
+      - family-names: Herrmann
+        given-names: Andreas
+      - family-names: Barkai
+        given-names: Naama
+      - family-names: Klipp
+        given-names: Edda
+    journal: "Scientific Reports"
+    year: 2019
+    volume: 9
+    start: 3343
+    doi: "10.1038/s41598-019-39850-7"

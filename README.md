@@ -97,10 +97,13 @@ workbook, one sheet per file. Convenient for emailing.
 If you want to turn these couplings into a time-varying transcription rate for a
 dynamic model, see `transcription_multiplier/`. It provides a mean-preserving
 multiplier `k_x(t) = k_x * (1 + q_x * sum_i alpha_i (TF_i(t)/TF_i_mean - 1) / sum_i |alpha_i|)`,
-the per-TF cell-cycle means it needs, per-gene periodicity weights `q_x`, a drop-in
-Julia implementation, a fit-reproduction harness with tests (reproduces the committed
-fit exactly), and a six-source validation of the network. See its README for the
-formula, data dictionary, and validation summary.
+the per-TF cell-cycle means it needs (computed on the interpolated grid, so the
+multiplier preserves each gene's average rate to machine precision), per-gene
+periodicity weights `q_x`, a drop-in Julia implementation, a fit-reproduction
+harness with tests (reproduces the committed fit exactly), and a six-source
+structural corroboration of the network. The multiplier is a steady-state,
+mean-preserving relative-rate descriptor, not a dynamic mRNA predictor. See its
+README for the formula, data dictionary, and validation summary.
 
 Example Julia code (from inside `output/tf_handoff/`):
 
@@ -132,6 +135,13 @@ The notebook walks through how we picked the regularization weight, why we
 default to a NaN tolerance of 4 (with linear interpolation), and why we
 intentionally omit the intercept term. See sections 8, 9, and 10 of the
 notebook.
+
+The handoff couplings in `output/tf_handoff/` use the time delay `tau = 20` min
+and are the canonical, Teufel-only fit. Two variants are also available: a joint
+multi-dataset fit (across several cell-cycle RNA-seq time courses) that recovers more
+topology and transfers better across conditions, at the cost of noisier signs; and a
+leakage-free nested-CV setting `(w2 = 1, tau = 15)` recommended for new fits. The
+shipped `tau = 20` couplings remain the reference.
 
 ## What this is **not**
 

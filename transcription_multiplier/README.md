@@ -53,14 +53,23 @@ All 28 checks passing.
 | --- | --- |
 | `tf_means.csv` | per-TF cell-cycle mean (the required multiplier input), computed on the interpolated 22-point grid so the multiplier is mean-preserving to machine precision |
 | `tf_network_fitted.csv` | fitted non-zero couplings `(substrate, tf, alpha)` |
-| `qx_scores.csv` | per-gene `q_x` from Cyclebase 3.0 (rank, p-value, peaktime) + three [0,1] transforms |
+| `qx_scores.csv` | per-gene `q_x` from Cyclebase 3.0 (rank, p-value, peaktime) + three [0,1] transforms; the rank-linear transform (`q_rank`) is the default |
 | `tf_normalization_table.csv` | per-gene `sum alpha`, `sum |alpha|`, flags, min multiplier |
 | `multiplier_examples.csv` | signed vs deviation multiplier over the cell cycle |
 | `multisource_support.csv` | each fitted edge vs six independent networks + sign agreement |
 | `augmented_network_candidate.csv` | optional v2 network (Teufel + YEASTRACT-strict + literature) |
 | `augmented_alpha_fitted.csv` | `alpha` refit on the augmented network |
-| `union_network_alpha_fitted.csv` | `alpha` refit on the union of all sources (marginally better out-of-sample) |
+| `union_network_alpha_fitted.csv` | `alpha` refit on the union of all sources (an alternative coupling set) |
 | `ground_truth_cellcycle_edges.csv` | 62 curated, cited textbook cell-cycle edges |
+
+## What the multiplier is (and is not)
+
+The multiplier is a **steady-state, mean-preserving descriptor** of how a gene's
+transcription rate leans across the cell cycle. It is a relative-rate prior, not a
+dynamic predictor: in a first-order ODE driven by `k_x(t)`, it does **not** beat a
+flat rate at predicting held-out mRNA timepoints (the amplitude cap is structural,
+and per-gene phase prediction is at chance genome-wide). Use it to bias rates in the
+right direction with the average preserved, not to forecast mRNA dynamics.
 
 ## Validation summary
 
@@ -68,19 +77,42 @@ All 28 checks passing.
   independent sources (ChIP binding, two YEASTRACT vintages, a curated benchmark,
   SNAP, textbook edges); 49% by two or more. Scored as a ranked classifier against
   the Inferelator gold standard, the network reaches AUROC 0.815 (precision 0.48, a
-  29x lift over the edge prior; recall 0.68).
+  29x lift over the edge prior; recall 0.68). This is structural corroboration
+  within a curation-aligned candidate set, not independent validation.
 - **Signs:** agree with database labels 71% of the time overall, 94% against
   curated textbook edges. Coupling *magnitude* is fit-derived and does not track
-  database presence (corr ~ 0.01).
-- **Out of sample:** at `q_x = 1` the multiplier does not beat a flat rate on
-  held-out timepoints; skill is confined to genuinely periodic genes. Weighting by
-  `q_x` improves 93.8% of genes and recovers flat-baseline performance, so always
-  apply it. Treat the cell-cycle modulation as modest and structurally grounded.
-- **Network choice:** the union of all sources is marginally better out-of-sample
-  than Teufel alone (`union_network_alpha_fitted.csv`); consensus-only and
-  ChIP-only are worse. Teufel-based remains the validated default.
+  database presence (corr ~ 0.01). Activator signs are well supported; repressor
+  edges are individually lower-confidence, so treat the repressor contribution as a
+  sign (a direction), not a magnitude estimate.
+- **Mean preservation:** the per-TF means in `tf_means.csv` are computed on the same
+  NaN-interpolated 22-point grid the multiplier is evaluated on, so `<M_x>_t = 1`
+  holds to machine precision for every gene (earlier means were averaged over each
+  TF's non-NaN timepoints, which left up to a ~13% offset on NaN-affected genes).
+- **Cell-cycle weighting:** at `q_x = 1` the modulation is modest and skill is
+  confined to genuinely periodic genes; weighting by `q_x` improves 93.8% of genes
+  and recovers flat-baseline performance, so always apply it. The default `q_x` is
+  the rank-linear transform (`q_rank`); `q_sigmoid` is a documented alternative.
+
+## Recommendations
+
+- **Default coupling set: Teufel-only** (`tf_network_fitted.csv`). It carries the
+  cleanest signs (94% on curated edges), which is what the sign-aware multiplier
+  depends on, so it is the default for within-condition use.
+- **Joint multi-dataset couplings** (fit across Teufel plus other cell-cycle RNA-seq
+  time courses) recover more topology and transfer better across conditions in a
+  leave-one-dataset-out test; the independent signal here is that the joint fit beats
+  the single-dataset fit, not the absolute skill. The cost is noisier signs, so
+  prefer the joint set for cross-condition transfer and topology, and keep Teufel-only
+  for the sign-aware multiplier. The within-source union variant
+  (`union_network_alpha_fitted.csv`) is also provided.
+- **Time delay `tau`:** the released couplings use `tau = 20` min, which is the
+  canonical handoff. A leakage-free nested cross-validation prefers `(w2 = 1, tau = 15)`;
+  use that setting for any **new** fit, but the shipped `tau = 20` couplings remain
+  the reference.
 
 ## License and citation
 
-MIT (see `../LICENSE`). Please cite the source data — Teufel et al. 2019, Sci Rep
-9:3343 — and link back to `https://github.com/djsegal/tf-coupling-fit`.
+MIT (see `../LICENSE`). See `CITATION.cff` for how to cite this work. Please also
+cite the source data (Teufel et al. 2019, Sci Rep 9:3343) and link back to
+`https://github.com/djsegal/tf-coupling-fit`. `CHECKSUMS.sha256` lists the SHA-256
+of every released `data/` CSV.

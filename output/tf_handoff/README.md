@@ -6,6 +6,16 @@ Both `S` and `TF` are in molecules per cell (RPM rescaled by `60000 / 1e6`).
 The fit is doc-literal: no intercept, no degradation term. See section 10 of the
 generating notebook for the intercept trade-off.
 
+`tau = 20` min is the canonical handoff used here. A leakage-free nested
+cross-validation prefers `(w2 = 1, tau = 15)`; that setting is recommended for any
+new fit, while these `tau = 20` couplings remain the reference. These are the
+Teufel-only couplings; a joint multi-dataset variant (fit across several cell-cycle
+RNA-seq time courses) recovers more topology and transfers better across conditions,
+at the cost of noisier activator/repressor signs. To turn these couplings into a
+mean-preserving cell-cycle rate multiplier, see `transcription_multiplier/`; its
+per-TF means are computed on the interpolated grid so the multiplier preserves each
+gene's average rate to machine precision.
+
 ## Files
 
 - `metadata.json`: fit parameters, source data, counts, timestamp.
