@@ -114,4 +114,35 @@ const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
         # loaded expression is finite and rescaled (NaN-interpolated, RPM->molecules)
         @test all(isfinite, expr)
     end
+
+    # ----------------------------------------------------------------------
+    # Joint multi-dataset headline anchor. Skips gracefully when the fetched
+    # gold standard / name map (data/external/) are absent, so CI stays green
+    # without third-party data. Run `julia transcription_multiplier/fetch_datasets.jl
+    # --gold-only` to enable it. Scores the SHIPPED joint coupling CSVs (no LP
+    # re-solve), so this is fast.
+    @testset "joint fit reproduces headline AUROC + DeLong (needs data/external/)" begin
+        ext  = joinpath(@__DIR__, "data", "external")
+        need = [joinpath(ext, "SGD_features.tab"),
+                joinpath(ext, "inferelator_gold_standard.tsv"),
+                joinpath(@__DIR__, "data", "tf_network_fitted.csv"),
+                joinpath(@__DIR__, "data", "joint_multidataset_alpha.csv"),
+                joinpath(@__DIR__, "data", "loo_kelliher_alpha.csv")]
+        if all(isfile, need)
+            include(joinpath(@__DIR__, "joint_score.jl"))
+            aucT, aucJ, diff, lo, hi, ok = Main.main(; refit = false)
+            @test isapprox(aucT, 0.804; atol = 0.01)   # single-dataset (Teufel)
+            @test isapprox(aucJ, 0.899; atol = 0.01)   # joint multi-dataset
+            @test isapprox(diff, 0.071; atol = 0.01)   # paired DeLong delta
+            @test lo > 0                               # CI excludes zero
+            @test isapprox(lo, 0.052; atol = 0.01)
+            @test isapprox(hi, 0.091; atol = 0.01)
+            @test ok
+        else
+            absent = join([basename(f) for f in need if !isfile(f)], ", ")
+            @info "skipping joint headline test; missing $absent. " *
+                  "Run transcription_multiplier/fetch_datasets.jl --gold-only to enable."
+            @test_skip true
+        end
+    end
 end

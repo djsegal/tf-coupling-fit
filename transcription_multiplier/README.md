@@ -45,14 +45,96 @@ julia --project=.. transcription_multiplier/runtests.jl
 committed `alpha` exactly (max |delta alpha| = 0). `runtests.jl` checks that, plus
 the multiplier properties (unit mean, non-negativity, all-activator identity,
 `q_x` amplitude scaling, and machine-precision mean preservation across all genes).
-All 28 checks passing.
+With no third-party data present, 28 checks pass and the joint-fit check is skipped;
+with the gold standard fetched (below), all 35 pass.
+
+## Reproduce the headline cross-dataset result (Julia)
+
+The single-dataset coupling set (`tf_network_fitted.csv`) is the within-condition
+default. Fitting jointly across five cell-cycle expression courses
+(Teufel + Spellman + Pramila + Orlando + Kelliher) recovers more of the gold-standard
+topology. Scored against the signed Inferelator gold standard on the **common
+rectangle** (the 82 TF x 606 target block all three coupling sets and the gold
+cover, 864 gold-positive edges), area under the ROC rises from
+
+> **Teufel-only AUROC 0.804 -> joint AUROC 0.899**, paired DeLong test
+> **+0.071, 95% CI [0.052, 0.091], p = 1.4e-12**.
+
+Regenerate it end to end:
+
+```bash
+# 1. fetch the gold standard + ORF name map (two small public files)
+julia transcription_multiplier/fetch_datasets.jl --gold-only
+
+# 2. score the SHIPPED coupling sets and run the paired DeLong test
+julia --project=.. transcription_multiplier/joint_score.jl
+#    -> prints 0.804, 0.899, +0.071 [0.052, 0.091], p = 1.4e-12
+```
+
+This *scored* path needs no expression data: the joint couplings
+(`joint_multidataset_alpha.csv`) and the leave-Kelliher-out couplings
+(`loo_kelliher_alpha.csv`) are shipped in `data/`, so an independent reader
+reproduces the headline from released files plus the two-file fetch.
+
+To regenerate the joint couplings themselves from raw expression (the deeper
+"from scratch" path), fetch all five datasets and re-solve the shared-alpha L1 LP:
+
+```bash
+julia transcription_multiplier/fetch_datasets.jl          # all datasets + gold
+julia --project=.. transcription_multiplier/joint_score.jl --refit
+#    re-solves the joint LP (JuMP/HiGHS, ~6 s) and scores those couplings;
+#    same 0.804 -> 0.899, +0.071.
+```
+
+`joint_fit.jl` builds the joint multi-dataset design and shared-alpha L1 LP (the
+same residual-L1 + `w2`*L1(alpha) program as `refit.jl`, with every dataset's rows
+stacked). `joint_score.jl` loads the signed gold, scores trapezoid AUROC on the
+common rectangle, and runs the fast Sun & Xu DeLong test. The from-raw re-solve
+reproduces the shipped joint couplings to < 5e-7 per edge.
+
+The **single-dataset AUROC 0.815** (Teufel-only on its own gold rectangle, the
+structural-corroboration number) is likewise re-scorable from released files plus
+the fetched gold standard.
+
+### What reproduces what
+
+| Number | Reproduce from | Needs fetch? |
+| --- | --- | --- |
+| `alpha` (single-dataset couplings), max delta = 0 | `refit.jl` + `../data/` (shipped) | no |
+| single-dataset AUROC 0.815 | shipped `tf_network_fitted.csv` + gold | gold + SGD only |
+| joint AUROC 0.899 / DeLong +0.071 (scored) | shipped joint couplings + gold | gold + SGD only |
+| joint couplings themselves, then 0.899 / +0.071 | `joint_fit.jl` re-solve from raw | all five datasets + gold |
+
+### Shipped vs fetched
+
+**Shipped** (in `data/`, checksummed in `CHECKSUMS.sha256`): the single-dataset
+couplings, the joint couplings (`joint_multidataset_alpha.csv`), the
+leave-Kelliher-out couplings (`loo_kelliher_alpha.csv`), and all derived tables.
+
+**Fetched, not redistributed** (downloaded by `fetch_datasets.jl` into
+`data/external/`, each from its own public source and verified by SHA-256):
+
+| File | Source | Citation |
+| --- | --- | --- |
+| `inferelator_gold_standard.tsv` | Flatiron Institute `inferelator` repo, `data/yeast/gold_standard.tsv` | Tchourine, Vogel & Bonneau 2018, Cell Rep 23:376 |
+| `SGD_features.tab` | SGD archive (`sgd-archive.yeastgenome.org`) | Saccharomyces Genome Database |
+| `spellman_combined.txt` | Spellman cell-cycle combined table (archived) | Spellman et al. 1998, MBC 9:3273 (PMID 9843569) |
+| `pramila.pcl` | SGD archive `GSE4987_setA_family.pcl` | Pramila et al. 2006, Genes Dev 20:2266 (GEO GSE4987) |
+| `orlando_setA.pcl` | SGD archive `GSE8799_setA_family.pcl` | Orlando et al. 2008, Nature 453:944 (GEO GSE8799) |
+| `GSE80474_Scerevisiae_normalized.txt` | GEO supplementary (`.gz`, decompressed) | Kelliher et al. 2016, PLoS Genet 12:e1006453 (GEO GSE80474) |
+
+If the archived Spellman table is unreachable, `fetch_datasets.jl` prints a manual
+fallback (the Bioconductor `yeastCC` package, or the SGD-archive alpha-factor PCL);
+the *scored* headline does not depend on it, since the joint couplings are shipped.
 
 ## Data dictionary (`data/`)
 
 | File | Contents |
 | --- | --- |
 | `tf_means.csv` | per-TF cell-cycle mean (the required multiplier input), computed on the interpolated 22-point grid so the multiplier is mean-preserving to machine precision |
-| `tf_network_fitted.csv` | fitted non-zero couplings `(substrate, tf, alpha)` |
+| `tf_network_fitted.csv` | fitted non-zero couplings `(substrate, tf, alpha)`; the single-dataset (Teufel-only) default |
+| `joint_multidataset_alpha.csv` | joint couplings fit across all five cell-cycle courses (the AUROC 0.899 set); `(substrate, tf, alpha)` |
+| `loo_kelliher_alpha.csv` | leave-Kelliher-out joint couplings (leakage-free transfer reference); `(substrate, tf, alpha)` |
 | `qx_scores.csv` | per-gene `q_x` from Cyclebase 3.0 (rank, p-value, peaktime) + three [0,1] transforms; the rank-linear transform (`q_rank`) is the default |
 | `tf_normalization_table.csv` | per-gene `sum alpha`, `sum |alpha|`, flags, min multiplier |
 | `multiplier_examples.csv` | signed vs deviation multiplier over the cell cycle |
