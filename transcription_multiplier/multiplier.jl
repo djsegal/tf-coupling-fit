@@ -14,10 +14,49 @@ holds to machine precision for every gene (not just genes with complete TF data)
 =#
 using CSV, DataFrames
 
+"""
+    DATA_DIR
+
+Absolute path to the package's bundled `data/` directory (fitted network, TF
+means, q_x scores). Default argument to [`load_handoff`](@ref).
+"""
 const DATA_DIR = joinpath(@__DIR__, "data")
 
-"Load (edges::Dict{String,Vector{Tuple{String,Float64}}}, means::Dict{String,Float64})."
+"""
+    load_handoff(dir::AbstractString=DATA_DIR) -> (edges, means)
+
+Load the fitted handoff produced by the fit pipeline:
+
+  - `edges::Dict{String,Vector{Tuple{String,Float64}}}` maps each substrate gene to
+    its list of `(tf, alpha)` regulator coefficients (`data/tf_network_fitted.csv`).
+  - `means::Dict{String,Float64}` maps each TF to its mean RPM level over the
+    NaN-interpolated cell-cycle trajectory (`data/tf_means.csv`).
+
+These are exactly the inputs the [`multiplier`](@ref) Dict method expects.
+
+Throws an informative `ArgumentError` if `dir` does not exist or is missing
+either CSV (instead of a cryptic file-not-found from the CSV reader).
+
+# Example
+```jldoctest
+julia> using TranscriptionMultiplier
+
+julia> edges, means = load_handoff();
+
+julia> edges isa Dict{String,Vector{Tuple{String,Float64}}}
+true
+
+julia> haskey(edges, "CLN2") && haskey(means, first(first(edges["CLN2"])))
+true
+```
+"""
 function load_handoff(dir::AbstractString=DATA_DIR)
+    isdir(dir) ||
+        throw(ArgumentError("load_handoff: data directory does not exist: $dir"))
+    for f in ("tf_network_fitted.csv", "tf_means.csv")
+        isfile(joinpath(dir, f)) ||
+            throw(ArgumentError("load_handoff: missing required file '$f' in $dir"))
+    end
     e = CSV.read(joinpath(dir, "tf_network_fitted.csv"), DataFrame)
     edges = Dict{String,Vector{Tuple{String,Float64}}}()
     for row in eachrow(e)
@@ -35,8 +74,39 @@ end
 """
     multiplier(substrate, tf_levels, edges, means; q=1.0, clamp=true) -> Float64
 
-`tf_levels::Dict{String,<:Real}` current TF amounts. `q ∈ [0,1]` scales cycling
-amplitude; `clamp` applies a max(0, M) floor.
+Mean-preserving cell-cycle transcription-rate multiplier `Mₓ(t)` for one
+`substrate` gene, computed from a Dict of current TF amounts:
+
+    Mₓ(t) = 1 + q * ( Σᵢ αᵢ (TFᵢ(t)/TFᵢ_mean − 1) ) / Σᵢ |αᵢ|
+
+Arguments:
+
+  - `substrate`            : gene name (key into `edges`).
+  - `tf_levels::Dict`      : current TF amounts, `Dict{String,<:Real}`.
+  - `edges::Dict`          : `substrate => [(tf, alpha), ...]` (see [`load_handoff`](@ref)).
+  - `means::Dict`          : `tf => mean_level` over the cell cycle.
+
+Keywords: `q` scales the cycling amplitude (the report uses `q ∈ [0,1]`, with
+`q=0` giving a flat `M≡1`); `clamp` applies a `max(0, M)` floor.
+
+A substrate with no regulators (or all-zero `alpha`) returns `1.0`. TFs absent
+from `tf_levels`/`means` (or with zero mean) are skipped, so partial input is
+tolerated rather than erroring.
+
+# Example
+```jldoctest
+julia> using TranscriptionMultiplier
+
+julia> edges = Dict("CLN2" => [("SWI4", 2.0), ("MBP1", -1.0)]);
+
+julia> means = Dict("SWI4" => 100.0, "MBP1" => 50.0);
+
+julia> multiplier("CLN2", Dict("SWI4" => 100.0, "MBP1" => 50.0), edges, means)  # at the mean
+1.0
+
+julia> multiplier("UNKNOWN_GENE", Dict("SWI4" => 999.0), edges, means)  # no regulators
+1.0
+```
 """
 function multiplier(substrate, tf_levels, edges, means; q::Float64=1.0, clamp::Bool=true)
     haskey(edges, substrate) || return 1.0

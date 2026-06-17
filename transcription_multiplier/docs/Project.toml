@@ -1,0 +1,8 @@
+name = "TranscriptionMultiplierDocs"
+
+# Standalone environment for building the Documenter.jl site (EE4). Kept
+# separate from the package's own Project.toml so the test environment stays
+# unchanged. The package itself is loaded via the parent project; see docs/make.jl.
+
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
