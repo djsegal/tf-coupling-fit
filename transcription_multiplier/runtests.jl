@@ -5,6 +5,7 @@
 
 using Test, CSV, DataFrames, Statistics
 include(joinpath(@__DIR__, "refit.jl"))
+include(joinpath(@__DIR__, "multiplier.jl"))   # load_handoff/save_handoff/export_handoff_json + Dict multiplier
 
 const REPO = normpath(joinpath(@__DIR__, ".."))
 const EXPR = joinpath(REPO, "data", "WT_unstressed_readspermillionreads.csv")
@@ -93,6 +94,40 @@ const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
         sub = "RTS3"
         @test all(isapprox.(Mseries(sub; q=0.0), 1.0; atol=1e-12))
         @test isapprox(mean(Mseries(sub; q=0.5)), 1.0; atol=0.06)
+    end
+
+    @testset "save_handoff round-trips through load_handoff (SW2)" begin
+        e0, m0 = load_handoff()                       # package-bundled handoff
+        tmp = mktempdir()
+        @test save_handoff(tmp, e0, m0) == tmp
+        e1, m1 = load_handoff(tmp)
+        @test Set(keys(e1)) == Set(keys(e0))
+        @test all(Set(e1[k]) == Set(e0[k]) for k in keys(e0))
+        @test m1 == m0
+        # dependency-free JSON export is well-formed (balanced + both sections)
+        jpath = export_handoff_json(joinpath(tmp, "handoff.json"), e0, m0)
+        txt = read(jpath, String)
+        @test occursin("\"edges\"", txt) && occursin("\"means\"", txt)
+        @test count(==('{'), txt) == count(==('}'), txt)
+        @test count(==('['), txt) == count(==(']'), txt)
+        @test count(==('"'), txt) % 2 == 0
+    end
+
+    @testset "multiplier is thread-safe under concurrent reads (SW3)" begin
+        # The Dict multiplier reads only its arguments and mutates nothing, so
+        # concurrent calls on a SHARED (edges, means) must match the serial result
+        # exactly. This is a real race check when run with >1 thread (and still a
+        # correctness check at -t1). nthreads reported for transparency.
+        e0, m0 = load_handoff()
+        subs = collect(keys(e0))
+        tfl  = Dict(tf => 1.3 * v for (tf, v) in m0)   # perturb off the mean
+        serial = [multiplier(s, tfl, e0, m0) for s in subs]
+        par = Vector{Float64}(undef, length(subs))
+        Threads.@threads for i in eachindex(subs)
+            par[i] = multiplier(subs[i], tfl, e0, m0)
+        end
+        @info "SW3 thread-safety check" nthreads = Threads.nthreads() ngenes = length(subs)
+        @test par == serial
     end
 
     @testset "helper unit + edge cases" begin

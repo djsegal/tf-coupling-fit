@@ -31,8 +31,8 @@ include(joinpath(@__DIR__, "..", "refit.jl"))
 # ---- public API -----------------------------------------------------------
 # mean-preserving multiplier (both Dict and Vector methods)
 export multiplier
-# load / refit helpers
-export load_handoff, load_rna_seq, load_tf_network, build_regulators,
+# load / save / refit helpers
+export load_handoff, save_handoff, export_handoff_json, load_rna_seq, load_tf_network, build_regulators,
        fit_substrate, fit_all, linear_interp
 # default data directory used by load_handoff
 export DATA_DIR

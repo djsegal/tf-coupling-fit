@@ -121,3 +121,66 @@ function multiplier(substrate, tf_levels, edges, means; q::Float64=1.0, clamp::B
     M = 1.0 + q * dev / sabs
     return clamp ? max(0.0, M) : M
 end
+
+"""
+    save_handoff(dir, edges, means) -> dir
+
+Inverse of [`load_handoff`](@ref): write `edges` and `means` back out to
+`tf_network_fitted.csv` and `tf_means.csv` under `dir` (created if needed), in
+the exact schema `load_handoff` reads. Round-trips: after
+`save_handoff(dir, e, m)`, `load_handoff(dir)` returns dicts equal to `(e, m)`.
+Rows are sorted (substrate, then TF order as given; means by TF) for a
+deterministic, diff-friendly file. Uses only the package's existing `CSV`
+dependency — no extra serialization libraries.
+"""
+function save_handoff(dir::AbstractString, edges::AbstractDict, means::AbstractDict)
+    isdir(dir) || mkpath(dir)
+    esub = String[]; etf = String[]; ealpha = Float64[]
+    for sub in sort(collect(keys(edges))), (tf, a) in edges[sub]
+        push!(esub, sub); push!(etf, tf); push!(ealpha, Float64(a))
+    end
+    CSV.write(joinpath(dir, "tf_network_fitted.csv"),
+              DataFrame(substrate = esub, tf = etf, alpha = ealpha))
+    mtf = String[]; mval = Float64[]
+    for tf in sort(collect(keys(means)))
+        push!(mtf, tf); push!(mval, Float64(means[tf]))
+    end
+    CSV.write(joinpath(dir, "tf_means.csv"),
+              DataFrame(tf = mtf, tf_mean_rpm = mval))
+    return dir
+end
+
+"""
+    export_handoff_json(path, edges, means) -> path
+
+Write the handoff as one portable JSON document for non-Julia consumers (e.g. the
+whole-cell-model team's Python stack):
+
+    {"edges": {substrate: [[tf, alpha], ...], ...}, "means": {tf: mean, ...}}
+
+Hand-written and write-only, so the package gains no JSON dependency (the board's
+"optional, not a heavy hard dep" rule); read it back with any JSON library. Keys
+are plain gene/TF symbols, but strings are escaped defensively. `alpha`/`mean`
+are finite by construction, so the numeric output is always valid JSON.
+"""
+function export_handoff_json(path::AbstractString, edges::AbstractDict, means::AbstractDict)
+    esc(s) = replace(string(s), "\\" => "\\\\", "\"" => "\\\"")
+    io = IOBuffer()
+    print(io, "{\n  \"edges\": {")
+    subs = sort(collect(keys(edges)))
+    for (i, sub) in enumerate(subs)
+        print(io, i == 1 ? "\n" : ",\n", "    \"", esc(sub), "\": [")
+        for (j, (tf, a)) in enumerate(edges[sub])
+            print(io, j == 1 ? "" : ", ", "[\"", esc(tf), "\", ", Float64(a), "]")
+        end
+        print(io, "]")
+    end
+    print(io, "\n  },\n  \"means\": {")
+    tfs = sort(collect(keys(means)))
+    for (i, tf) in enumerate(tfs)
+        print(io, i == 1 ? "\n" : ",\n", "    \"", esc(tf), "\": ", Float64(means[tf]))
+    end
+    print(io, "\n  }\n}\n")
+    write(path, take!(io))
+    return path
+end

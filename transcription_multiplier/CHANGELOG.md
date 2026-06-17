@@ -8,6 +8,20 @@ This project loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 
 ### Added
 
+- **Handoff serialization (optional, dependency-light).** `save_handoff(dir,
+  edges, means)` is the inverse of `load_handoff`: it writes the in-memory
+  dicts back to `tf_network_fitted.csv` / `tf_means.csv` (sorted, diff-friendly)
+  and round-trips exactly, using only the existing `CSV` dependency.
+  `export_handoff_json(path, edges, means)` emits a single portable JSON document
+  (`{"edges": {...}, "means": {...}}`) for non-Julia consumers — hand-written and
+  write-only, so the package gains no JSON/Arrow dependency. Both are exported
+  from the module.
+- **Thread-safety guarantee + test.** The `multiplier` hot path reads only its
+  arguments and holds no shared mutable state, so it is safe to call concurrently
+  on a shared `(edges, means)`. `runtests.jl` now asserts this directly: a
+  `Threads.@threads` sweep over all genes must equal the serial result (a real
+  race check at `-t>1`).
+
 - **Module-ization.** `src/TranscriptionMultiplier.jl` wraps the existing
   scripts as a proper Julia module, so `using TranscriptionMultiplier` exposes
   the core API: the mean-preserving `multiplier` (both the low-level
@@ -35,5 +49,5 @@ This project loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 ### Unchanged
 
 - No existing script was moved, renamed, or behaviorally altered. The notebook
-  entry points, the committed handoff, and `runtests.jl` (35 tests) all still
-  run and pass exactly as before.
+  entry points, the committed handoff, and `runtests.jl` (now 44 tests) all
+  still run and pass exactly as before.
