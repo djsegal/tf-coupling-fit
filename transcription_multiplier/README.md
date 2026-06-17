@@ -311,6 +311,8 @@ The "six independent networks" are the non-`teufel` `in_*` columns
 | `score` | overall 0-1 trust score, a heuristic blend of the components above (not a calibrated probability) |
 | `tier` | `USE`, `CAUTION`, or `DO-NOT-USE`, derived from `score` and the reasons |
 | `reason` | `;`-delimited reason codes when not a clean USE (e.g. `non-periodic`, `over-parameterized`, `sign-unstable`, `low-overall-score`); empty for clean genes |
+| `apply_multiplier` | boolean drop-in gate: `true` (1,058 genes) means apply `M_x(t)`; `false` (1,348) means fall back to a flat rate (`M = 1`). `true` iff `tier == USE` and the gene is periodic. The CAUTION tier shows no held-out transfer advantage over flat, so the practical gate is binary |
+| `recommended_fallback` | `none` for apply genes, `flat_M1` for DO-NOT-USE, `damped` for CAUTION (damping toward 1 is an optional engineering choice, not data-supported) |
 
 > The exact weighting formula that combines these components into `score`, and the
 > thresholds that map `score` to `tier`, live in the generating code, not in this
