@@ -343,7 +343,7 @@ right direction with the average preserved, not to forecast mRNA dynamics.
 - **Mean preservation:** the per-TF means in `tf_means.csv` are computed on the same
   NaN-interpolated 22-point grid the multiplier is evaluated on, so `<M_x>_t = 1`
   holds to machine precision for every gene (earlier means were averaged over each
-  TF's non-NaN timepoints, which left up to a ~13% offset on NaN-affected genes).
+  TF's non-NaN timepoints, which left up to a ~11% offset on NaN-affected genes).
 - **Cell-cycle weighting:** at `q_x = 1` the modulation is modest and skill is
   confined to genuinely periodic genes; weighting by `q_x` improves 93.8% of genes
   and recovers flat-baseline performance, so always apply it. The default `q_x` is
