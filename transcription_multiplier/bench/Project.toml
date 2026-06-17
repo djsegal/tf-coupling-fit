@@ -1,0 +1,9 @@
+name = "TranscriptionMultiplierBench"
+
+# Standalone environment for the BenchmarkTools suite (EE1). Kept separate from
+# the package's own Project.toml so the test environment stays unchanged. The
+# package itself is loaded via a relative dev-style path; see bench/benchmarks.jl,
+# which pushes the parent project onto LOAD_PATH at runtime.
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
