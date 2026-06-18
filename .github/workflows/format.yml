@@ -1,0 +1,27 @@
+name: Format
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# BlueStyle formatting check (advisory). Reports any files that would change
+# under JuliaFormatter's BlueStyle without failing the build, so formatting
+# drift is visible in review but never blocks a merge.
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+      - name: Check BlueStyle
+        run: |
+          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+          julia -e '
+            using JuliaFormatter
+            ok = format("transcription_multiplier"; style = BlueStyle(), overwrite = false)
+            ok || @warn "Some files are not BlueStyle-formatted; run JuliaFormatter locally."
+          '

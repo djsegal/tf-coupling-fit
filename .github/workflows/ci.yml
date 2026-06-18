@@ -1,0 +1,34 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Tests the TranscriptionMultiplier package. runtests.jl reads ../data and
+# ../output relative to the package, so we check out the whole repo and run from
+# the transcription_multiplier/ directory. The joint multi-dataset headline test
+# skips gracefully when data/external/ is absent (not committed), so CI stays
+# green without third-party downloads; the L1 fit-reproduction test always runs.
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version: ["1.10", "1.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+      - uses: julia-actions/cache@v2
+      - name: Instantiate and test
+        working-directory: transcription_multiplier
+        run: |
+          julia --project=. -e '
+            using Pkg
+            Pkg.instantiate()
+            include("runtests.jl")
+          '
