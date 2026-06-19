@@ -4,7 +4,7 @@ All notable changes to the `TranscriptionMultiplier` package are documented here
 This project loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [1.0.0] - 2026-06-18
 
 ### Added
 
