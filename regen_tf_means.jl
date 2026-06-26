@@ -1,13 +1,13 @@
 #!/usr/bin/env julia
-# Regenerate transcription_multiplier/data/tf_means.csv so each TF's mean is the
+# Regenerate data/tf_means.csv so each TF's mean is the
 # discrete mean of the SAME NaN-interpolated 22-point trajectory the multiplier and
 # refit evaluate on (refit.jl::load_rna_seq). This makes the deviation-form
 # multiplier mean-preserving (<M_x>_t = 1) to machine precision.
-#   julia --project=. transcription_multiplier/regen_tf_means.jl
+#   julia --project=. regen_tf_means.jl
 using CSV, DataFrames
 include(joinpath(@__DIR__, "refit.jl"))
 
-const REPO = normpath(joinpath(@__DIR__, ".."))
+const REPO = @__DIR__
 const EXPR = joinpath(REPO, "data", "WT_unstressed_readspermillionreads.csv")
 const MEANS = joinpath(@__DIR__, "data", "tf_means.csv")
 

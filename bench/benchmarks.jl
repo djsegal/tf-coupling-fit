@@ -1,14 +1,10 @@
 #!/usr/bin/env julia
 # EE1: BenchmarkTools suite for the transcription-multiplier hot paths.
 #
-# Run standalone from the package directory:
+# Run from the repo root:
 #
-#   julia --project=bench transcription_multiplier/bench/benchmarks.jl          # print results
-#   julia --project=bench transcription_multiplier/bench/benchmarks.jl --write  # also (re)write BENCHMARKS.md
-#
-# or from inside transcription_multiplier/:
-#
-#   julia --project=bench bench/benchmarks.jl [--write]
+#   julia --project=bench bench/benchmarks.jl          # print results
+#   julia --project=bench bench/benchmarks.jl --write  # also (re)write BENCHMARKS.md
 #
 # ADDITIVE: this lives in its own environment (bench/Project.toml) so the
 # package's own Project.toml / test stack stay untouched. It loads the package

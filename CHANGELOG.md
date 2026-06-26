@@ -4,6 +4,19 @@ All notable changes to the `TranscriptionMultiplier` package are documented here
 This project loosely follows [Keep a Changelog](https://keepachangelog.com/) and
 [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-06-26
+
+### Changed
+
+- **Repackaged as a root-level Julia package.** The `TranscriptionMultiplier`
+  package, previously under the `transcription_multiplier/` subdirectory, is now
+  at the repository root (`Project.toml`, `src/`, `test/` at top level), and the
+  repository is renamed `TranscriptionMultiplier.jl` to match the standard
+  `Name.jl` convention. The raw inputs and derived tables are merged into a single
+  `data/`; scripts and CI are re-pathed to the root. No change to the couplings,
+  the multiplier, the released data, or the public API — the released CSV
+  checksums are unchanged.
+
 ## [1.0.0] - 2026-06-18
 
 ### Added
@@ -35,7 +48,7 @@ This project loosely follows [Keep a Changelog](https://keepachangelog.com/) and
   `runtests.jl` continue to work unchanged.
 - **Package metadata.** A package-level `Project.toml` (`name`, `uuid`,
   `[deps]`, `[compat]`) so the package can be activated with
-  `julia --project=.` from `transcription_multiplier/`.
+  `julia --project=.` from the repo root.
 - **Property/invariant tests.** `proptests.jl` exercises the multiplier's
   stated invariants on randomized inputs: (a) `<M>_t == 1` to machine precision
   for any alpha signs and any `q`; (b) `M >= 0` over the grid (clamped method);

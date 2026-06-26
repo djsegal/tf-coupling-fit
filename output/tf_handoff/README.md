@@ -12,7 +12,7 @@ new fit, while these `tau = 20` couplings remain the reference. These are the
 Teufel-only couplings; a joint multi-dataset variant (fit across several cell-cycle
 RNA-seq time courses) recovers more topology and transfers better across conditions,
 at the cost of noisier activator/repressor signs. To turn these couplings into a
-mean-preserving cell-cycle rate multiplier, see `transcription_multiplier/`; its
+mean-preserving cell-cycle rate multiplier, see the `TranscriptionMultiplier` package in this repository; its
 per-TF means are computed on the interpolated grid so the multiplier preserves each
 gene's average rate to machine precision.
 

@@ -4,16 +4,16 @@
 #   data/multiplier_examples.csv     (mult_signed vs mult_absdev over the cell cycle)
 #   data/tf_normalization_table.csv  (per-substrate alpha sums, flags, min multipliers)
 # Reuses refit.jl::load_rna_seq for the exact interpolated 22-point TF trajectories.
-#   julia --project=. transcription_multiplier/regen_derived.jl [--validate]
+#   julia --project=. regen_derived.jl [--validate]
 using CSV, DataFrames, Statistics
 include(joinpath(@__DIR__, "refit.jl"))
 
-const REPO = normpath(joinpath(@__DIR__, ".."))
+const REPO = @__DIR__
 const EXPR = joinpath(REPO, "data", "WT_unstressed_readspermillionreads.csv")
 const DATA = joinpath(@__DIR__, "data")
 
 validate = "--validate" in ARGS
-means_file = validate ? "HEAD:transcription_multiplier/data/tf_means.csv" : joinpath(DATA, "tf_means.csv")
+means_file = validate ? "HEAD:data/tf_means.csv" : joinpath(DATA, "tf_means.csv")
 
 # Interpolated 22-point TF trajectories (RPM->molecules; ratios are scale-free).
 time_axis, genes, expr = load_rna_seq(EXPR)

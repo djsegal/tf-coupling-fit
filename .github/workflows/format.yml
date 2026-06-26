@@ -22,6 +22,6 @@ jobs:
           julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
           julia -e '
             using JuliaFormatter
-            ok = format("transcription_multiplier"; style = BlueStyle(), overwrite = false)
+            ok = format("."; style = BlueStyle(), overwrite = false)
             ok || @warn "Some files are not BlueStyle-formatted; run JuliaFormatter locally."
           '

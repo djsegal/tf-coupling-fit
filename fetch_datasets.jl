@@ -2,7 +2,7 @@
 #=
 fetch_datasets.jl: download the third-party datasets needed to re-solve the joint
 multi-dataset fit and to score it against the Inferelator gold standard, into
-transcription_multiplier/data/external/, and verify each against a known SHA-256.
+data/external/, and verify each against a known SHA-256.
 
 We do NOT redistribute third-party raw data in this package. Each file is fetched
 from its own public source (SGD archive, GEO, or the Inferelator repository). All
@@ -11,15 +11,15 @@ README and each source's README).
 
 After this script succeeds you can:
   * re-solve the joint couplings from raw data and reproduce the headline:
-      julia --project=.. transcription_multiplier/joint_score.jl --refit
+      julia --project=. joint_score.jl --refit
   * the scored-mode headline (no re-solve) only needs SGD_features.tab and
       inferelator_gold_standard.tsv (the two smallest fetches), since the joint
       coupling CSVs are shipped in data/.
 
 Run from anywhere:
-  julia transcription_multiplier/fetch_datasets.jl            # fetch + verify all
-  julia transcription_multiplier/fetch_datasets.jl --gold-only # just SGD + gold
-  julia transcription_multiplier/fetch_datasets.jl --force     # re-download
+  julia fetch_datasets.jl            # fetch + verify all
+  julia fetch_datasets.jl --gold-only # just SGD + gold
+  julia fetch_datasets.jl --force     # re-download
 
 Pure Julia; uses the Downloads stdlib. No new dependency, no Python.
 =#

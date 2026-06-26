@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # EE6: type-stability / allocation spot check on the multiplier hot path.
 #
-#   julia --project=. transcription_multiplier/perf_check.jl    # from repo root
+#   julia --project=. perf_check.jl    # from repo root
 #   julia --project=. perf_check.jl                             # from package dir
 #
 # ADDITIVE: read-only diagnostics; touches nothing else. Captures whether the

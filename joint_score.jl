@@ -13,12 +13,12 @@ Prints, and asserts within tolerance:
 
 Two modes (default = scored, which needs no dataset fetch):
 
-  julia --project=.. transcription_multiplier/joint_score.jl
+  julia --project=. joint_score.jl
       Scores the SHIPPED coupling CSVs (data/tf_network_fitted.csv +
       data/joint_multidataset_alpha.csv + data/loo_kelliher_alpha.csv). Fast.
       This is the path an independent reader runs to regenerate the headline.
 
-  julia --project=.. transcription_multiplier/joint_score.jl --refit
+  julia --project=. joint_score.jl --refit
       Additionally re-solves the joint L1 LP from the fetched raw datasets
       (joint_fit.jl), writes the couplings to /tmp, and scores those instead, so
       the full raw-data-to-headline chain is exercised. Requires fetch_datasets.jl
@@ -42,7 +42,7 @@ using .JointFit: build_name_maps, key_factory, Dataset,
 using Statistics, Printf
 
 const HERE = @__DIR__
-const REPO = normpath(joinpath(HERE, ".."))
+const REPO = HERE
 const DATA = joinpath(HERE, "data")
 const EXT  = joinpath(DATA, "external")
 
@@ -211,7 +211,7 @@ function main(; refit::Bool = false)
         isfile(f) || error("missing required file: $f")
     end
     for f in (SGD, GOLD)
-        isfile(f) || error("missing fetched file: $f -- run transcription_multiplier/fetch_datasets.jl first")
+        isfile(f) || error("missing fetched file: $f -- run fetch_datasets.jl first")
     end
 
     orf2std, std2orf = build_name_maps(WT, SGD)

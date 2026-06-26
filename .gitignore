@@ -11,6 +11,10 @@ Manifest.toml
 tf_handoff.zip
 alpha_w2=*.csv
 
+# Third-party datasets fetched by fetch_datasets.jl (downloaded + checksum-verified,
+# not redistributed here)
+data/external/
+
 # OS
 .DS_Store
 Thumbs.db

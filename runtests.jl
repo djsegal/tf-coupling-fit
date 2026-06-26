@@ -1,13 +1,13 @@
 #!/usr/bin/env julia
 # Tests for the cell-cycle transcription multiplier and the fit reproduction.
-#   julia --project=. transcription_multiplier/runtests.jl
-# Run from the repo root (uses ../data and ../output relative to this file).
+#   julia --project=. runtests.jl
+# Run from the repo root (uses data and output relative to this file).
 
 using Test, CSV, DataFrames, Statistics
 include(joinpath(@__DIR__, "refit.jl"))
 include(joinpath(@__DIR__, "multiplier.jl"))   # load_handoff/save_handoff/export_handoff_json + Dict multiplier
 
-const REPO = normpath(joinpath(@__DIR__, ".."))
+const REPO = @__DIR__
 const EXPR = joinpath(REPO, "data", "WT_unstressed_readspermillionreads.csv")
 const NET  = joinpath(REPO, "data", "TF_von_Teufel.csv")
 const COMMITTED = joinpath(REPO, "output", "tf_handoff", "alpha_edges.csv")
@@ -153,7 +153,7 @@ const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
     # ----------------------------------------------------------------------
     # Joint multi-dataset headline anchor. Skips gracefully when the fetched
     # gold standard / name map (data/external/) are absent, so CI stays green
-    # without third-party data. Run `julia transcription_multiplier/fetch_datasets.jl
+    # without third-party data. Run `julia fetch_datasets.jl
     # --gold-only` to enable it. Scores the SHIPPED joint coupling CSVs (no LP
     # re-solve), so this is fast.
     @testset "joint fit reproduces headline AUROC + DeLong (needs data/external/)" begin
@@ -176,7 +176,7 @@ const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
         else
             absent = join([basename(f) for f in need if !isfile(f)], ", ")
             @info "skipping joint headline test; missing $absent. " *
-                  "Run transcription_multiplier/fetch_datasets.jl --gold-only to enable."
+                  "Run fetch_datasets.jl --gold-only to enable."
             @test_skip true
         end
     end

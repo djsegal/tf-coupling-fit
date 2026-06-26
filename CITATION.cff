@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 message: "If you use these transcription-factor couplings or the cell-cycle rate multiplier, please cite this work and the source data (Teufel et al. 2019)."
-title: "tf-coupling-fit: transcription-factor coupling strengths and a mean-preserving cell-cycle rate multiplier for Saccharomyces cerevisiae"
+title: "TranscriptionMultiplier.jl: transcription-factor coupling strengths and a mean-preserving cell-cycle rate multiplier for Saccharomyces cerevisiae"
 type: software
 authors:
   - family-names: Segal
     given-names: Daniel J.
-url: "https://github.com/djsegal/tf-coupling-fit"
-repository-code: "https://github.com/djsegal/tf-coupling-fit"
+url: "https://github.com/djsegal/TranscriptionMultiplier.jl"
+repository-code: "https://github.com/djsegal/TranscriptionMultiplier.jl"
 license: MIT
 keywords:
   - transcription factor

@@ -4,8 +4,8 @@ plus leave-one-timepoint-out cross-validation. Same solver stack as the generati
 notebook, so it reproduces the committed alpha exactly. Used by runtests.jl.
 
     include("refit.jl")
-    ta, genes, expr = load_rna_seq(joinpath(@__DIR__,"..","data","WT_unstressed_readspermillionreads.csv"))
-    edges = load_tf_network(joinpath(@__DIR__,"..","data","TF_von_Teufel.csv"))
+    ta, genes, expr = load_rna_seq(joinpath(@__DIR__,"data","WT_unstressed_readspermillionreads.csv"))
+    edges = load_tf_network(joinpath(@__DIR__,"data","TF_von_Teufel.csv"))
     reg   = build_regulators(edges, Set(genes))
     res   = fit_all(ta, Dict(g=>i for (i,g) in enumerate(genes)), expr, reg)
 =#

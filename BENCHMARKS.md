@@ -7,7 +7,7 @@ are the numbers a future change is compared against, so regressions show up.
 Reproduce (standalone, from the package directory):
 
 ```
-julia --project=bench transcription_multiplier/bench/benchmarks.jl --write
+julia --project=bench bench/benchmarks.jl --write
 ```
 
 The suite times three hot paths:

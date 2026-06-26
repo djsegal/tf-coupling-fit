@@ -1,5 +1,5 @@
 {
-  "title": "tf-coupling-fit: transcription-factor coupling strengths and a mean-preserving cell-cycle rate multiplier for Saccharomyces cerevisiae",
+  "title": "TranscriptionMultiplier.jl: transcription-factor coupling strengths and a mean-preserving cell-cycle rate multiplier for Saccharomyces cerevisiae",
   "description": "Per-edge transcription-factor coupling strengths (~3,900 non-zero edges over ~2,400 substrate genes and ~150 TFs) for budding yeast, fit by L1-regularized regression on the Teufel 2019 cell-cycle RNA-seq time course, together with a mean-preserving, bounded cell-cycle transcription-rate multiplier (the Julia package TranscriptionMultiplier) for use as a transcription-module input to dynamic and whole-cell models. The deposit includes the fitted handoff (dense matrix, long-form edges, metadata), the end-to-end analysis notebook, and a reproducible test suite.",
   "upload_type": "software",
   "license": "MIT",

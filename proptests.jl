@@ -1,7 +1,7 @@
 #!/usr/bin/env julia
 # Property / invariant tests for the cell-cycle transcription multiplier.
 #
-#   julia --project=. transcription_multiplier/proptests.jl        # from repo root
+#   julia --project=. proptests.jl        # from repo root
 #   julia --project=. proptests.jl                                 # from package dir
 #
 # ADDITIVE: this file is independent of runtests.jl and does not modify it.

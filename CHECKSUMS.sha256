@@ -1,4 +1,4 @@
-# SHA-256 checksums for transcription_multiplier/data/ released CSVs
+# SHA-256 checksums for data/ released CSVs
 # Verify with: shasum -a 256 -c CHECKSUMS.sha256  (run from this directory)
 #
 9b8870fafaa1cc61b8862a8507ec44e1e66208c5831605af8cad62a4b22022ac  data/augmented_alpha_fitted.csv

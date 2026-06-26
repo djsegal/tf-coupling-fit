@@ -22,8 +22,8 @@ unmeasurable regulator inside an otherwise-used dataset gets an all-zero design
 row so the alpha index stays aligned.
 
 INPUTS (see fetch_datasets.jl and the README reproducibility section)
-  WT_unstressed_readspermillionreads.csv  the Teufel WT RNA-seq (in ../data)
-  TF_von_Teufel.csv                        the candidate TF->gene network (in ../data)
+  WT_unstressed_readspermillionreads.csv  the Teufel WT RNA-seq (in data)
+  TF_von_Teufel.csv                        the candidate TF->gene network (in data)
   SGD_features.tab                         ORF<->standard name map (fetched)
   the four extra cell-cycle courses        Spellman, Pramila, Orlando, Kelliher (fetched)
 
@@ -156,7 +156,7 @@ function zscore_dict(series::Dict{String,Vector{Float64}}, times::Vector{Float64
 end
 
 # --------------------------------------------------------------------- parsers
-"""Teufel WT RNA-seq (../data/WT_unstressed_readspermillionreads.csv) ->
+"""Teufel WT RNA-seq (data/WT_unstressed_readspermillionreads.csv) ->
 (times, std-gene -> z-scored series). Key by standard `name` (uppercased),
 falling back to orf2std[orf] or orf. Drop if >4 NaNs; keep strongest-varying
 duplicate."""

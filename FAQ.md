@@ -42,7 +42,7 @@ calls on a shared `(edges, means)` are race-free. `runtests.jl` asserts this wit
 
 ## How do I reproduce the headline numbers?
 
-`julia transcription_multiplier/fetch_datasets.jl --gold-only` fetches two small
+`julia fetch_datasets.jl --gold-only` fetches two small
 public files, then `runtests.jl` runs the joint AUROC + paired-DeLong test
 (0.804 -> 0.899, +0.071 [0.052, 0.091], p = 1.4e-12). Without the fetch the test
 skips and the rest of the suite still runs.
