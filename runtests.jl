@@ -6,6 +6,8 @@
 using Test, CSV, DataFrames, Statistics
 include(joinpath(@__DIR__, "refit.jl"))
 include(joinpath(@__DIR__, "multiplier.jl"))   # load_handoff/save_handoff/export_handoff_json + Dict multiplier
+import TranscriptionMultiplier            # the module, for the Aqua quality gate
+using Aqua
 
 const REPO = @__DIR__
 const EXPR = joinpath(REPO, "data", "WT_unstressed_readspermillionreads.csv")
@@ -14,6 +16,12 @@ const COMMITTED = joinpath(REPO, "output", "tf_handoff", "alpha_edges.csv")
 const FITTED = joinpath(@__DIR__, "data", "tf_network_fitted.csv")
 
 @testset "tf-coupling-fit multiplier" begin
+
+    @testset "Q — Aqua (deps/compat/piracy/exports/unbound)" begin
+        Aqua.test_all(TranscriptionMultiplier; ambiguities=false)
+    end
+    # ExplicitImports + JET gates await moving multiplier.jl/refit.jl into src/ —
+    # they can't analyse the root-level include layout. Tracked as a follow-up.
 
     # load once
     time_axis, genes, expr = load_rna_seq(EXPR)
